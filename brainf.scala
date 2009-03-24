@@ -8,15 +8,8 @@ class BrainF {
 	/*Parse a brainfuck string in and decode it to the output string.
 	 *Not sure how to handle bad input, but will figure it out later
 	 */
-	//All brainfuck programs are to operate within a 30,000 byte array.
-	private var data = new Array[Byte](30000);
-	//Pointer to current data cell
-	private var dataPtr = 0
-	//Instruction counter
-	private var PC = 0;
 	//Token holder, array list for backtracking purposes
 	private var tokenList = new ArrayList[(BrainFToken,Option[Int])];
-	private def goto(x:Int) = { PC = x }
 	/* Tokenize a string
 	 * Upon seeing a '[', push PC onto oldPC stack
 	 * Upon seeing a ']', pop oldPC stack into the optional Int portion of the tuple
@@ -25,7 +18,6 @@ class BrainF {
 	private def tokenize(x:String):Unit = {
 		tokenList.clear
 		var oldPC = new ArrayStack[Int]
-		var level = 0
 		for (i <- new Range(0,x.length,1)) {
 			x(i) match {
 				case '<' => tokenList.add((DP,None))
@@ -51,5 +43,53 @@ class BrainF {
 		tokenize(x);
 		tokenList.mkString(",");
 	}
-	private def parse():String = {return null}
+	/* Parse the string, backtrack as necessary */
+	def parse(x:String):String = {
+		//Instruction counter
+		var PC = 0;
+		//Pointer to current data cell
+		var dataPtr = 0
+		//All brainfuck programs are to operate within a 30,000 byte array.
+		var data = new Array[Byte](30000);
+		tokenize(x)
+		var outString = new StringBuffer
+		while(PC < tokenList.size)
+		{
+			var curInst = tokenList(PC)
+			curInst._1 match {
+				case IP => dataPtr+=1
+				case DP => dataPtr-=1
+				case PP => data.update(dataPtr,(data(dataPtr)+1).toByte)
+				case MP => data.update(dataPtr,(data(dataPtr)-1).toByte)
+				case LB => {
+					if (data(dataPtr) == 0)
+					{
+						curInst._2 match {
+							case Some(x) => PC = x
+							case None => /*?*/
+						}
+					}
+				}
+				case RB => {
+					if (data(dataPtr) != 0)
+					{
+						curInst._2 match {
+							case Some(x) => PC = x
+							case None => /*?*/
+						}
+					}
+				}
+				case IN => data(dataPtr)=(readChar).toByte
+				case OUT => outString.append(data(dataPtr).toChar)
+			}
+			PC+=1
+		}
+		return outString.toString
+	}
+}
+object BrainFParser{
+	def main(args:Array[String]) = {
+		val a = new BrainF
+		args.foreach(arg => println(a.parse(arg)))
+	}
 }
