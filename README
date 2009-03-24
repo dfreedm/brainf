@@ -1,0 +1,12 @@
+BrainF is a BrainFuck interpreter written in only ~100 lines
+Usage: scala BrainFParser "brainfuckline"
+Example: $ scala BrainFParser "++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>."
+Hello World
+
+Also, can be used within a scala project (or the interpreter).
+Example:
+scala> var a = new BrainF
+scala> a.parse("++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>.")
+Hello World
+
+So far, it only handles correctly formatted input, with unmatched brackets failing silently.
