@@ -1,13 +1,26 @@
 /** Brainfuck interpreter
  *  Written just to do it
  */
-import BrainFToken._
 import scala.collection.mutable.ArrayStack
 import scala.collection.jcl.ArrayList
 class BrainF {
 	/*Parse a brainfuck string in and decode it to the output string.
 	 *Not sure how to handle bad input, but will figure it out later
 	 */
+	object BrainFToken extends Enumeration {
+		type BrainFToken = Value
+		val IP,DP,PP,MP,OUT,IN,LB,RB = Value
+		/* IP == >
+		 * DP == <
+		 * PP == +
+		 * MP == -
+		 * OUT == .
+		 * IN == ,
+		 * LB == [
+		 * RB == ]
+		 */
+	}
+	import BrainFToken._
 	//Token holder, array list for backtracking purposes
 	private var tokenList = new ArrayList[(BrainFToken,Option[Int])];
 	/* Tokenize a string
@@ -31,6 +44,7 @@ class BrainF {
 					tokenList.add((LB,None))
 				}
 				case ']' => {
+					//Rewrite '[' to point to the corresponding ']'
 					tokenList.add((RB,Some(oldPC.peek)))
 					tokenList.update(oldPC.pop,(LB,Some(i)))
 				}
@@ -61,6 +75,7 @@ class BrainF {
 				case DP => dataPtr-=1
 				case PP => data.update(dataPtr,(data(dataPtr)+1).toByte)
 				case MP => data.update(dataPtr,(data(dataPtr)-1).toByte)
+				//Basically gotos, might be a better way, but this is so easy
 				case LB => {
 					if (data(dataPtr) == 0)
 					{
