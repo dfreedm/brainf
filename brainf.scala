@@ -9,7 +9,7 @@ class BrainF {
 	 */
 	object BrainFToken extends Enumeration {
 		type BrainFToken = Value
-		val IP,DP,PP,MP,OUT,IN,LB,RB = Value
+		val IP,DP,PP,MP,OUT,IN,LB,RB,NOP = Value
 		/* IP == >
 		 * DP == <
 		 * PP == +
@@ -18,6 +18,7 @@ class BrainF {
 		 * IN == ,
 		 * LB == [
 		 * RB == ]
+		 * NOP == a no op value to preserve space
 		 */
 	}
 	import BrainFToken._
@@ -31,7 +32,7 @@ class BrainF {
 	private def tokenize(x:String):Unit = {
 		tokenList.clear
 		var oldPC = new ArrayStack[Int]
-		for (i <- new Range(0,x.length,1)) {
+		for (i <- 0 until x.length) {
 			x(i) match {
 				case '<' => tokenList.add((DP,None))
 				case '>' => tokenList.add((IP,None))
@@ -48,7 +49,7 @@ class BrainF {
 					tokenList.add((RB,Some(oldPC.peek)))
 					tokenList.update(oldPC.pop,(LB,Some(i)))
 				}
-				case _ => { /*?*/ }
+				case _ => tokenList.add((NOP,None))
 			}
 		}
 	}
@@ -96,6 +97,7 @@ class BrainF {
 				}
 				case IN => data(dataPtr)=(readChar).toByte
 				case OUT => outString.append(data(dataPtr).toChar)
+				case _ => {}
 			}
 			PC+=1
 		}
